@@ -1,6 +1,8 @@
 FROM python:3.11-slim
 
-WORKDIR /Basic-Django-Website
+RUN mkdir /app
+ 
+WORKDIR /app
 
 COPY . .
 
