@@ -24,18 +24,31 @@ This project serves as a simple starter template for learning Django + Docker + 
 
 ---
 
+## 📂 Project Structure
+```bash
+django-ecs-demo/
+│── manage.py
+│── Dockerfile
+│── requirements.txt
+│── django_ecs_demo/   # Main project settings
+│── home/              # Django app with templates & views
+│── templates/         # HTML templates
+```
+
 ## 🖥️ Run Locally
 Clone the repo:
 ```bash
 git clone https://github.com/<your-username>/django-ecs-demo.git
 cd django-ecs-demo
 ```
+
+Create a virtual environment & install dependencies:
 ```bash
 python -m venv venv
 source venv/bin/activate   # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
-
+Run start server:
 ```bash
 python manage.py migrate
 python manage.py runserver
@@ -44,10 +57,34 @@ python manage.py runserver
 Visit: http://127.0.0.1:8000/
 
 ## 🐳 Docker Setup
+Build Docker image:
 ```bash
 docker build -t django-ecs-ecr .
 ```
 
+Run locally with Docker:
 ```bash
 docker run django-ecs-ecr
 ```
+
+## ☁️ AWS Deployment
+1. Authenticate Docker with ECR
+```bash
+aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com
+```
+
+2. Create ECR Repository
+```bash
+aws ecr create-repository --repository-name django-ecs-demo
+```
+
+3. Tag & Push Image
+```bash
+docker tag django-ecs-demo:latest <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/django-ecs-demo:latest
+docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/django-ecs-demo:latest
+```
+
+4. Deploy on ECS
+   Create an ECS cluster
+   Define a Task Definition with your ECR image
+   Create a Service to run your container
