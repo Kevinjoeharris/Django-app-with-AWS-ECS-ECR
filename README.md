@@ -37,7 +37,7 @@ django-ecs-demo/
 ## 🖥️ Run Locally
 Clone the repo:
 ```bash
-git clone https://github.com/<your-username>/django-ecs-demo.git
+git clone https://github.com/<your-username>/Django-app-with-AWS-ECS-ECR.git
 cd django-ecs-demo
 ```
 
@@ -58,12 +58,12 @@ Visit: http://127.0.0.1:8000/
 ## 🐳 Docker Setup
 Build Docker image:
 ```bash
-docker build -t django-ecs-ecr .
+docker build -t basic-django-app .
 ```
 
 Run locally with Docker:
 ```bash
-docker run django-ecs-ecr
+docker run basic-django-app
 ```
 
 ## ☁️ AWS Deployment
@@ -74,13 +74,13 @@ aws ecr get-login-password --region <your-region> | docker login --username AWS 
 
 2. Create ECR Repository
 ```bash
-aws ecr create-repository --repository-name django-ecs-demo
+aws ecr create-repository --repository-name django-ecs-ecr
 ```
 
 3. Tag & Push Image
 ```bash
-docker tag django-ecs-demo:latest <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/django-ecs-demo:latest
-docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/django-ecs-demo:latest
+docker tag django-ecs-ecr:latest <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/django-ecs-ecr:latest
+docker push <aws-account-id>.dkr.ecr.<your-region>.amazonaws.com/django-ecs-ecr:latest
 ```
 
 4. Deploy on ECS
