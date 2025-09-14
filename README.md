@@ -30,9 +30,8 @@ django-ecs-demo/
 │── manage.py
 │── Dockerfile
 │── requirements.txt
-│── django_ecs_demo/   # Main project settings
-│── home/              # Django app with templates & views
-│── templates/         # HTML templates
+│── basic_django_app/   # Main project settings
+│── templates/          # HTML templates
 ```
 
 ## 🖥️ Run Locally
