@@ -32,6 +32,7 @@ django-ecs-demo/
 │── requirements.txt
 │── basic_django_app/   # Main project settings
 │── templates/          # HTML templates
+│── Jenkinsfile
 ```
 
 ## 🖥️ Run Locally
@@ -58,12 +59,12 @@ Visit: http://127.0.0.1:8000/
 ## 🐳 Docker Setup
 Build Docker image:
 ```bash
-docker build -t basic-django-app .
+docker build -t django-ecs-ecr .
 ```
 
 Run locally with Docker:
 ```bash
-docker run basic-django-app
+docker run django-ecs-ecr
 ```
 
 ## ☁️ AWS Deployment
