@@ -1,15 +1,25 @@
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
 }
 
+# Default VPC + Subnets
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
 
 # ECR Repository
 resource "aws_ecr_repository" "django" {
-  name = var.django-ecs-ecr
+  name = "django-ecs-ecr"
 }
 
-
-# Security Group
+# Security Group for ECS
 resource "aws_security_group" "ecs_sg" {
   name        = "django-ecs-ecr-sg"
   description = "Allow HTTP to ECS tasks"
@@ -29,7 +39,6 @@ resource "aws_security_group" "ecs_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 
 # ECS Execution Role
 resource "aws_iam_role" "ecs_execution_role" {
@@ -52,12 +61,10 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-
 # ECS Cluster
 resource "aws_ecs_cluster" "django_cluster" {
   name = "django-ecs-ecr-cluster"
 }
-
 
 # ECS Task Definition
 resource "aws_ecs_task_definition" "django_task" {
@@ -79,36 +86,17 @@ resource "aws_ecs_task_definition" "django_task" {
   }])
 }
 
-
 # ECS Service
 resource "aws_ecs_service" "django_service" {
   name            = "django-ecs-ecr-service"
   cluster         = aws_ecs_cluster.django_cluster.id
   task_definition = aws_ecs_task_definition.django_task.arn
-  desired_count   = var.desired_count
+  desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.subnet_ids
+    subnets          = data.aws_subnets.default.ids
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
-  }
-}
-
-# Jenkins Server
-resource "aws_ec2_instance" "jenkins _server" {
-  
-
-}
-
-# Default VPC + Subnets
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
   }
 }
