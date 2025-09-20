@@ -21,6 +21,7 @@ pipeline {
                 sh 'docker build -t django-ecs-ecr:${IMAGE_TAG} .'
             }
         }
+        
 
         stage('Push to ECR') {
             steps {
@@ -37,7 +38,7 @@ pipeline {
                 sh '''
                 aws ecs update-service \
                   --cluster django-ecs-ecr-cluster \
-                  --service django-ecs-ecr-cluster \
+                  --service django-ecs-ecr-service \
                   --force-new-deployment \
                   --region $AWS_REGION
                 '''
