@@ -2,87 +2,39 @@ pipeline {
     agent any
     environment {
         AWS_REGION = "us-east-1"
-        ACCOUNT_ID = "679510350363"
-        IMAGE_REPO = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/django-app-prod"
+        ACCOUNT_ID = "917877044379"
+        IMAGE_REPO = "917877044379.dkr.ecr.us-east-1.amazonaws.com/django-ecs-ecr"
         IMAGE_TAG  = "${env.BUILD_NUMBER}"
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')     // Jenkins credential ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
     }
 
-    stages {
+    /*stages {
         stage('Checkout') {
             steps {
-                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/Kevinjoeharris/Django-app-with-AWS-ECS-ECR.git'
+                git branch: 'main', url: 'https://github.com/Kevinjoeharris/Django-app-with-AWS-ECS-ECR.git'
             }
-        }
+        }*/
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t django-app:${IMAGE_TAG} .'
+                sh 'docker build -t django-ecs-ecr:${IMAGE_TAG} .'
             }
         }
-
-        stage('Login to ECR') {
-            steps {
-                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 679510350363.dkr.ecr.us-east-1.amazonaws.com'
-                 }
-             }
-        }
-
 
         stage('Push to ECR') {
             steps {
                 sh '''
-                docker tag django-app-prod:${IMAGE_TAG} $IMAGE_REPO:${IMAGE_TAG}
+                aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $IMAGE_REPO
+                docker tag django-ecs-ecr:${IMAGE_TAG} $IMAGE_REPO:${IMAGE_TAG}
                 docker push $IMAGE_REPO:${IMAGE_TAG}
                 '''
             }
         }
 
-        stage('Deploy to Dev') {
-            when {
-                branch "dev"
-            }
+        stage('Deploy') {
             steps {
                 sh '''
-                cd terraform
-                terraform init
-                terraform apply -var-file=dev.tfvars -auto-approve
-                aws ecs update-service \
-                  --cluster django-app-dev-cluster \
-                  --service django-app-dev-service \
-                  --force-new-deployment \
-                  --region $AWS_REGION
-                '''
-            }
-        }
-
-        stage('Approval for Prod') {
-            when {
-                branch "main"
-            }
-            steps {
-                script {
-                    def userInput = input(
-                        id: 'ProdApproval', message: 'Deploy to Production?', parameters: [
-                            choice(name: 'Confirm', choices: ['No', 'Yes'], description: 'Deploy to prod?')
-                        ]
-                    )
-                    if (userInput == 'No') {
-                        error "Prod deployment aborted by user."
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to Prod') {
-            when {
-                branch "main"
-            }
-            steps {
-                sh '''
-                cd terraform
-                terraform init
-                terraform apply -var-file=prod.tfvars -auto-approve
                 aws ecs update-service \
                   --cluster django-app-prod-cluster \
                   --service django-app-prod-service \
