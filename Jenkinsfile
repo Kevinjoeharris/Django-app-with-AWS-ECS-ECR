@@ -36,8 +36,8 @@ pipeline {
             steps {
                 sh '''
                 aws ecs update-service \
-                  --cluster django-app-prod-cluster \
-                  --service django-app-prod-service \
+                  --cluster django-ecs-ecr-cluster \
+                  --service django-ecs-ecr-cluster \
                   --force-new-deployment \
                   --region $AWS_REGION
                 '''
