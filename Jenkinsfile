@@ -2,20 +2,14 @@ pipeline {
     agent any
     environment {
         AWS_REGION = "us-east-1"
-        ACCOUNT_ID = "917877044379"
-        IMAGE_REPO = "917877044379.dkr.ecr.us-east-1.amazonaws.com/django-ecs-ecr"
+        ACCOUNT_ID = "<YOUR-ACCOUNT-ID>"
+        IMAGE_REPO = "<YOUR-ACCOUNT-ID>.dkr.ecr.us-east-1.amazonaws.com/django-ecs-ecr"
         IMAGE_TAG  = "${env.BUILD_NUMBER}"
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')     // Jenkins credential ID
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
     }
 
     stages {
-        /*stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Kevinjoeharris/Django-app-with-AWS-ECS-ECR.git'
-            }
-        }*/
-
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t django-ecs-ecr:${IMAGE_TAG} .'
@@ -45,4 +39,13 @@ pipeline {
             }
         }
     }
+}
+
+post {
+    always {
+            echo "Pipeline finished. Deployed successfully"
+    }
+    failure {
+        echo "Pipeline failed!"
+    }
 }
